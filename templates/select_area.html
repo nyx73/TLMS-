@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Area - Smart Traffic System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="select-area-body">
+    <div class="select-area-container">
+        <h1>Select Traffic Area</h1>
+        <p>Choose an area to view its real-time traffic dashboard.</p>
+        <div class="area-grid">
+            {% for area in areas %}
+            <a href="{{ url_for('dashboard', area=area) }}" class="area-card">
+                <h3>{{ area }}</h3>
+                <p>View live traffic data</p>
+            </a>
+            {% endfor %}
+        </div>
+        <a href="{{ url_for('logout') }}" class="logout-btn-small">Logout</a>
+    </div>
+</body>
+</html>

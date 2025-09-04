@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Traffic System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-body">
+    <!-- Dynamic background element - now powered purely by CSS -->
+    <div id="dynamic-background"></div>
+
+    <div class="login-container">
+        <h1>Smart Traffic Management</h1>
+        <h2>Admin Login</h2>
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
+            <button type="submit">Login</button>
+        </form>
+        <p class="note">Use username: <strong>admin</strong>, password: <strong>password123</strong></p>
+    </div>
+
+
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Smart Traffic System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="dashboard-header">
+        <h1>🚦 AI-Based Smart Traffic Management Dashboard</h1>
+        <div class="header-controls">
+            <span class="location-time">
+                📍 Vadodara, Gujarat, India | Area: <strong>{{ area_name }}</strong> | <span id="current-time"></span>
+            </span>
+            <a href="{{ url_for('select_area') }}" class="select-area-btn">Change Area</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <main class="dashboard-main">
+        <section class="overview-section">
+            <div class="card current-green-lane-card">
+                <h3>Current Green Signal</h3>
+                <div class="green-lane-indicator">
+                    <span id="green-lane-display">{{ current_green_lane }}</span>
+                    <div class="signal-circle green"></div>
+                </div>
+                <p>Prioritized based on real-time density & emergencies.</p>
+            </div>
+
+            <div class="card alert-status-card">
+                <h3>System Alerts</h3>
+                <div id="alert-display" class="alert-message no-alert">
+                    No active alerts.
+                </div>
+                <div class="alert-threshold-config">
+                    <label for="max-density-input">Alert if density > </label>
+                    <input type="number" id="max-density-input" value="{{ alert_threshold }}" min="0">
+                    <button id="set-threshold-btn">Set Threshold</button>
+                    <p class="threshold-info">Current Threshold: <strong id="current-threshold-display">{{ alert_threshold }}</strong></p>
+                </div>
+            </div>
+        </section>
+
+        <section class="lane-status-section">
+            <h2>Lane Status & Controls</h2>
+            <div class="lane-grid">
+                {% for lane_id, data in lanes_info.items() %}
+                <div class="lane-card {{ data.signal_status | lower }}-signal" id="{{ lane_id | replace(' ', '-') }}-card">
+                    <h3>{{ lane_id }}</h3>
+                    <div class="traffic-counts">
+                        <p>🛵 2-Wheelers: <span id="{{ lane_id | replace(' ', '-') }}-2w">{{ data.two_wheelers }}</span></p>
+                        <p>🚗 4-Wheelers: <span id="{{ lane_id | replace(' ', '-') }}-4w">{{ data.four_wheelers }}</span></p>
+                    </div>
+                    <p class="lane-density">Total Density: <strong id="{{ lane_id | replace(' ', '-') }}-density">{{ data.density }}</strong></p>
+                    <div class="priority-status">
+                        <span class="emergency-tag {% if data.is_emergency %}active{% endif %}">🚨 Emergency: <span id="{{ lane_id | replace(' ', '-') }}-emergency">{{ 'YES' if data.is_emergency else 'NO' }}</span></span>
+                        <span class="vip-tag {% if data.is_vip %}active{% endif %}">👑 VIP: <span id="{{ lane_id | replace(' ', '-') }}-vip">{{ 'YES' if data.is_vip else 'NO' }}</span></span>
+                    </div>
+                    <div class="signal-light-container">
+                        <div class="signal-circle" id="{{ lane_id | replace(' ', '-') }}-signal-indicator"></div>
+                        <span class="signal-text" id="{{ lane_id | replace(' ', '-') }}-signal-text">{{ data.signal_status }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="analytics-section">
+            <h2>Real-time Lane Density</h2>
+            <div class="chart-container">
+                <canvas id="laneDensityChart"></canvas>
+            </div>
+        </section>
+
+        <section class="historical-analytics-section">
+            <h2>Historical Lane Density Trends</h2>
+            <div class="chart-container">
+                <canvas id="historicalDensityChart"></canvas>
+            </div>
+        </section>
+
+        <section class="challan-management-section">
+            <h2>Challan Management</h2>
+            <div class="challan-controls">
+                <label for="challan-status-filter">Filter by Status:</label>
+                <select id="challan-status-filter">
+                    <option value="pending">Pending</option>
+                    <option value="paid">Paid</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="challan-list-container">
+                <table id="challan-table">
+                    <thead>
+                        <tr>
+                            <th>Violator Name</th>
+                            <th>Vehicle No.</th>
+                            <th>Owner Phone</th>
+                            <th>Vehicle Type</th>
+                            <th>Challan No.</th>
+                            <th>Transaction ID</th>
+                            <th>Fine Amount</th> <!-- New Column -->
+                            <th>Timestamp</th>
+                            <th>Status</th>
+                            <th>Receipt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Challan data will be loaded here by JavaScript -->
+                    </tbody>
+                </table>
+                <p id="no-challans-message" class="info-message" style="display: none;">No challans found for this filter.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Get the current area name from the HTML (passed by Flask)
+        const currentArea = "{{ area_name }}";
+
+        // --- Current Time Display ---
+        function updateCurrentTime() {
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US', options);
+        }
+        setInterval(updateCurrentTime, 1000); // Update every second
+        updateCurrentTime(); // Call immediately on load
+
+        // --- Real-time Lane Density Chart.js Initialization ---
+        const ctxRealtime = document.getElementById('laneDensityChart').getContext('2d');
+        let laneDensityChart = new Chart(ctxRealtime, {
+            type: 'bar',
+            data: {
+                labels: {{ lane_labels | tojson }}, // Initial data from Flask
+                datasets: [{
+                    label: 'Current Lane Density Score',
+                    data: {{ lane_densities | tojson }}, // Initial data from Flask
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', // Lane 1 (Reddish)
+                        'rgba(54, 162, 235, 0.7)', // Lane 2 (Blueish)
+                        'rgba(255, 206, 86, 0.7)', // Lane 3 (Yellowish)
+                        'rgba(75, 192, 192, 0.7)'  // Lane 4 (Tealish)
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Density Score'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Traffic Lane'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: `Real-time Lane Density Distribution for ${currentArea}`
+                    }
+                }
+            }
+        });
+
+        // --- Historical Lane Density Chart.js Initialization ---
+        const ctxHistorical = document.getElementById('historicalDensityChart').getContext('2d');
+        let historicalDensityChart = new Chart(ctxHistorical, {
+            type: 'line',
+            data: {
+                labels: [], // Will be populated dynamically
+                datasets: [] // Will be populated dynamically
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Density Score'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            callback: function(value, index, values) {
+                                // Format timestamp to HH:MM:SS
+                                const date = new Date(value);
+                                return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: `Historical Lane Density Trends for ${currentArea}`
+                    }
+                }
+            }
+        });
+
+        // --- Function to fetch and update REAL-TIME data ---
+        function updateTrafficData() {
+            fetch(`/api/traffic_data/${currentArea}`)
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            window.location.href = "{{ url_for('login') }}";
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Update current green lane display
+                    document.getElementById('green-lane-display').textContent = data.current_green_lane;
+
+                    // Update individual lane cards and signal indicators
+                    for (const lane_id in data.lanes_info) {
+                        const info = data.lanes_info[lane_id];
+                        const id_prefix = lane_id.replace(' ', '-');
+
+                        document.getElementById(`${id_prefix}-2w`).textContent = info.two_wheelers;
+                        document.getElementById(`${id_prefix}-4w`).textContent = info.four_wheelers;
+                        document.getElementById(`${id_prefix}-density`).textContent = info.density;
+                        document.getElementById(`${id_prefix}-emergency`).textContent = info.is_emergency ? 'YES' : 'NO';
+                        document.getElementById(`${id_prefix}-vip`).textContent = info.is_vip ? 'YES' : 'NO';
+                        document.getElementById(`${id_prefix}-signal-text`).textContent = info.signal_status;
+
+                        const laneCard = document.getElementById(`${id_prefix}-card`);
+                        laneCard.classList.remove('green-signal', 'red-signal');
+                        laneCard.classList.add(`${info.signal_status.toLowerCase()}-signal`);
+
+                        const signalIndicator = document.getElementById(`${id_prefix}-signal-indicator`);
+                        signalIndicator.classList.remove('green', 'red');
+                        signalIndicator.classList.add(info.signal_status.toLowerCase());
+
+                        const emergencyTag = document.querySelector(`#${id_prefix}-card .emergency-tag`);
+                        if (info.is_emergency) {
+                            emergencyTag.classList.add('active');
+                        } else {
+                            emergencyTag.classList.remove('active');
+                        }
+                        const vipTag = document.querySelector(`#${id_prefix}-card .vip-tag`);
+                        if (info.is_vip) {
+                            vipTag.classList.add('active');
+                        } else {
+                            vipTag.classList.remove('active');
+                        }
+                    }
+
+                    // Update Real-time Chart.js data
+                    laneDensityChart.data.labels = data.lane_labels;
+                    laneDensityChart.data.datasets[0].data = data.lane_densities;
+                    laneDensityChart.options.plugins.title.text = `Real-time Lane Density Distribution for ${data.area_name}`;
+                    laneDensityChart.update();
+
+                    // Update Alert Display
+                    const alertDisplay = document.getElementById('alert-display');
+                    if (data.alert_triggered) {
+                        alertDisplay.textContent = data.alert_message;
+                        alertDisplay.classList.remove('no-alert');
+                        alertDisplay.classList.add('active-alert');
+                    } else {
+                        alertDisplay.textContent = "No active alerts.";
+                        alertDisplay.classList.remove('active-alert');
+                        alertDisplay.classList.add('no-alert');
+                    }
+                    document.getElementById('current-threshold-display').textContent = data.alert_threshold;
+                    document.getElementById('max-density-input').value = data.alert_threshold; // Keep input synced
+                })
+                .catch(error => console.error('Error fetching real-time traffic data:', error));
+        }
+
+        // --- Function to fetch and update HISTORICAL data ---
+        function updateHistoricalData() {
+            fetch(`/api/historical_traffic_data/${currentArea}`)
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            window.location.href = "{{ url_for('login') }}";
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const newDatasets = [];
+                    const colors = [
+                        'rgba(255, 99, 132, 1)', // Red
+                        'rgba(54, 162, 235, 1)', // Blue
+                        'rgba(255, 206, 86, 1)', // Yellow
+                        'rgba(75, 192, 192, 1)', // Green
+                        'rgba(153, 102, 255, 1)',// Purple
+                        'rgba(255, 159, 64, 1)'  // Orange
+                    ];
+                    let colorIndex = 0;
+
+                    let allTimestamps = new Set();
+                    for (const lane_id in data) {
+                        data[lane_id].timestamps.forEach(ts => allTimestamps.add(ts));
+                    }
+                    const sortedTimestamps = Array.from(allTimestamps).sort();
+
+                    for (const lane_id in data) {
+                        const laneData = data[lane_id];
+                        const densitiesMap = new Map();
+                        laneData.timestamps.forEach((ts, index) => {
+                            densitiesMap.set(ts, laneData.densities[index]);
+                        });
+
+                        const interpolatedDensities = sortedTimestamps.map(ts => {
+                            return densitiesMap.has(ts) ? densitiesMap.get(ts) : null; // Use null for missing points
+                        });
+
+                        newDatasets.push({
+                            label: lane_id,
+                            data: interpolatedDensities,
+                            borderColor: colors[colorIndex % colors.length],
+                            backgroundColor: colors[colorIndex % colors.length],
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                            spanGaps: true // Connect points across null values
+                        });
+                        colorIndex++;
+                    }
+
+                    historicalDensityChart.data.labels = sortedTimestamps;
+                    historicalDensityChart.data.datasets = newDatasets;
+                    historicalDensityChart.update();
+                })
+                .catch(error => console.error('Error fetching historical traffic data:', error));
+        }
+
+        // --- Function to fetch and update CHALLAN data ---
+        function updateChallanData(statusFilter = 'pending') {
+            const challanTableBody = document.querySelector('#challan-table tbody');
+            const noChallansMessage = document.getElementById('no-challans-message');
+            challanTableBody.innerHTML = ''; // Clear existing rows
+            noChallansMessage.style.display = 'none'; // Hide message by default
+
+            fetch(`/api/challans/${currentArea}?status=${statusFilter}`)
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            window.location.href = "{{ url_for('login') }}";
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(challans => {
+                    if (challans.length === 0) {
+                        noChallansMessage.style.display = 'block';
+                        return;
+                    }
+
+                    challans.forEach(challan => {
+                        const row = challanTableBody.insertRow();
+                        row.insertCell().textContent = challan.owner_name || 'N/A';
+                        row.insertCell().textContent = challan.vehicle_number || 'N/A';
+                        row.insertCell().textContent = challan.owner_phone || 'N/A';
+                        row.insertCell().textContent = challan.vehicle_type || 'N/A';
+                        row.insertCell().textContent = challan.challan_number || 'N/A';
+                        row.insertCell().textContent = challan.transaction_id || 'N/A';
+                        row.insertCell().textContent = `Rs. ${challan.fine_amount || 0}`; // Display fine amount
+                        row.insertCell().textContent = new Date(challan.timestamp).toLocaleString();
+                        const statusCell = row.insertCell();
+                        statusCell.textContent = challan.status.toUpperCase();
+                        statusCell.classList.add(`challan-status-${challan.status}`);
+
+                        const actionCell = row.insertCell();
+                        if (challan.status === 'pending') {
+                            const markPaidBtn = document.createElement('button');
+                            markPaidBtn.textContent = 'Mark Paid';
+                            markPaidBtn.classList.add('challan-action-btn', 'mark-paid-btn');
+                            markPaidBtn.dataset.challanId = challan.id;
+                            markPaidBtn.addEventListener('click', handleMarkPaid);
+                            actionCell.appendChild(markPaidBtn);
+
+                            const printChallanBtn = document.createElement('a');
+                            printChallanBtn.textContent = 'Print Challan';
+                            printChallanBtn.href = `/generate_pending_challan_pdf/${challan.id}`; // Link to pending PDF route
+                            printChallanBtn.target = '_blank';
+                            printChallanBtn.classList.add('challan-action-btn', 'generate-receipt-btn'); // Reuse button style
+                            actionCell.appendChild(printChallanBtn);
+
+                        } else if (challan.status === 'paid') {
+                            const generateReceiptBtn = document.createElement('a');
+                            generateReceiptBtn.textContent = 'Generate Receipt';
+                            generateReceiptBtn.href = `/generate_paid_challan_pdf/${challan.id}`; // Link to paid PDF route
+                            generateReceiptBtn.target = '_blank';
+                            generateReceiptBtn.classList.add('challan-action-btn', 'generate-receipt-btn');
+                            actionCell.appendChild(generateReceiptBtn);
+                        } else {
+                            actionCell.textContent = '-';
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching challan data:', error));
+        }
+
+        // --- Event Listener for Set Threshold Button ---
+        document.getElementById('set-threshold-btn').addEventListener('click', function() {
+            const maxDensityInput = document.getElementById('max-density-input');
+            const newThreshold = parseInt(maxDensityInput.value);
+
+            if (isNaN(newThreshold) || newThreshold < 0) {
+                alert('Please enter a valid non-negative number for the threshold.');
+                return;
+            }
+
+            fetch('/api/set_alert_threshold', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    area_name: currentArea,
+                    max_density: newThreshold
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    document.getElementById('current-threshold-display').textContent = newThreshold;
+                    updateTrafficData();
+                } else {
+                    alert('Failed to set threshold: ' + data.error);
+                }
+            })
+            .catch(error => console.error('Error setting threshold:', error));
+        });
+
+        // --- Event Listener for Challan Status Filter ---
+        document.getElementById('challan-status-filter').addEventListener('change', function() {
+            const selectedStatus = this.value;
+            updateChallanData(selectedStatus);
+        });
+
+        // --- Handler for Mark Paid Button ---
+        function handleMarkPaid(event) {
+            const challanId = event.target.dataset.challanId;
+            const confirmAction = confirm(`Are you sure you want to mark Challan ID ${challanId} as PAID?`);
+
+            if (confirmAction) {
+                fetch('/api/update_challan_status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        challan_id: challanId,
+                        new_status: 'paid'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        updateChallanData(document.getElementById('challan-status-filter').value);
+                    } else {
+                        alert('Failed to update challan status: ' + data.error);
+                    }
+                })
+                .catch(error => console.error('Error updating challan status:', error));
+            }
+        }
+
+        // Initial data loads and periodic updates
+        updateTrafficData();
+        updateHistoricalData();
+        updateChallanData('pending');
+
+        setInterval(updateTrafficData, 3000);
+        setInterval(updateHistoricalData, 10000);
+        setInterval(() => updateChallanData(document.getElementById('challan-status-filter').value), 15000);
+    </script>
+</body>
+</html>

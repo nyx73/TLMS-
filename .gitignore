@@ -1,0 +1,9 @@
+# Ignore large files
+traffic.mp4
+*.weights
+*.cfg
+*.names
+
+# Ignore Python cache
+__pycache__/
+*.pyc

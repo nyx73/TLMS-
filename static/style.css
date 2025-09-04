@@ -1,0 +1,685 @@
+/* General Body and Fonts */
+body {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Login Page Specific Styling */
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #fff;
+    position: relative; /* Needed for absolute positioning of dynamic-background */
+    overflow: hidden; /* Hide overflow from transitions */
+}
+
+/* Dynamic Background Element - New CSS Animation */
+#dynamic-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* Ensure it's behind the login container */
+    background-color: #1a202c; /* Dark base color */
+    background-image:
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 20px),
+        repeating-linear-gradient(-45deg, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 20px);
+    background-size: 40px 40px; /* Size of the repeating pattern */
+    animation: background-pan 60s linear infinite; /* Slow, continuous movement */
+}
+
+@keyframes background-pan {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 400px 400px; /* Moves the pattern over time */
+    }
+}
+
+
+.login-container {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+    color: #333;
+    position: relative; /* Bring login container above the dynamic background */
+    z-index: 1;
+}
+
+.login-container h1 {
+    margin-bottom: 10px;
+    color: #3f51b5;
+    font-size: 2.2em;
+}
+
+.login-container h2 {
+    margin-bottom: 30px;
+    color: #555;
+    font-weight: normal;
+    font-size: 1.4em;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #444;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"] {
+    width: calc(100% - 20px);
+    padding: 12px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1em;
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.login-container button {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.login-container button:hover {
+    background-color: #45a049;
+}
+
+.error-message {
+    color: #d32f2f;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.login-container .note {
+    margin-top: 25px;
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* --- Select Area Page Styling --- */
+.select-area-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(to right, #007bff, #0056b3); /* Blue gradient */
+    color: #fff;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.select-area-container {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 100%;
+    max-width: 800px; /* Wider for area grid */
+    color: #333;
+}
+
+.select-area-container h1 {
+    margin-bottom: 15px;
+    color: #3f51b5;
+    font-size: 2.2em;
+}
+
+.select-area-container p {
+    margin-bottom: 30px;
+    color: #555;
+    font-size: 1.1em;
+}
+
+.area-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.area-card {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.area-card:hover {
+    background-color: #e9ecef;
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.area-card h3 {
+    margin-top: 0;
+    color: #007bff;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.area-card p {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 0;
+}
+
+.logout-btn-small {
+    background-color: #6c757d; /* Grey */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn-small:hover {
+    background-color: #5a6268;
+}
+
+
+/* Dashboard Header */
+.dashboard-header {
+    background-color: #2c3e50; /* Dark blue-grey */
+    color: #ecf0f1;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    gap: 10px; /* Space between items when wrapped */
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 1.8em;
+    display: flex;
+    align-items: center;
+}
+
+.dashboard-header h1::before {
+    content: ' ';
+    margin-right: 10px;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap; /* Allow wrapping of buttons */
+}
+
+.location-time {
+    font-size: 0.95em;
+    opacity: 0.8;
+}
+
+.logout-btn, .select-area-btn {
+    background-color: #e74c3c; /* Red */
+    color: white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+.select-area-btn {
+    background-color: #3498db; /* Blue */
+}
+
+.logout-btn:hover {
+    background-color: #c0392b;
+}
+.select-area-btn:hover {
+    background-color: #2980b9;
+}
+
+
+/* Main Dashboard Layout */
+.dashboard-main {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    display: grid;
+    gap: 25px;
+    grid-template-areas:
+        "overview"
+        "lanestatus"
+        "analytics"
+        "historical"
+        "challan"; /* Added challan area */
+}
+
+@media (min-width: 768px) {
+    .dashboard-main {
+        grid-template-columns: 1fr 2fr;
+        grid-template-areas:
+            "overview lanestatus"
+            "analytics analytics"
+            "historical historical"
+            "challan challan"; /* Challan takes full width below */
+    }
+    .overview-section { grid-area: overview; }
+    .lane-status-section { grid-area: lanestatus; }
+    .analytics-section { grid-area: analytics; }
+    .historical-analytics-section { grid-area: historical; }
+    .challan-management-section { grid-area: challan; } /* New grid area */
+}
+
+/* Card Styling */
+.card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 25px;
+}
+
+.overview-section .card {
+    text-align: center;
+}
+
+.overview-section h3 {
+    color: #3f51b5;
+    margin-top: 0;
+    font-size: 1.4em;
+}
+
+.green-lane-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.green-lane-indicator span {
+    font-size: 2.8em;
+    font-weight: bold;
+    color: #4CAF50; /* Green */
+}
+
+.overview-section p {
+    color: #666;
+    font-size: 0.95em;
+}
+
+/* Lane Status Section */
+.lane-status-section h2, .analytics-section h2, .historical-analytics-section h2, .challan-management-section h2 {
+    color: #3f51b5;
+    font-size: 1.6em;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.lane-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.lane-card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 2px solid transparent; /* Default border */
+    position: relative; /* For priority tags */
+}
+
+.lane-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.lane-card h3 {
+    color: #2c3e50;
+    margin-top: 0;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+.traffic-counts p {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #555;
+}
+
+.lane-density {
+    font-size: 1.2em;
+    margin: 15px 0;
+    color: #333;
+}
+
+.lane-density strong {
+    color: #4CAF50;
+}
+
+.priority-status {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.emergency-tag, .vip-tag {
+    background-color: #eee;
+    color: #777;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.85em;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.emergency-tag.active {
+    background-color: #e74c3c; /* Red for emergency */
+    color: white;
+}
+
+.vip-tag.active {
+    background-color: #8e44ad; /* Purple for VIP */
+    color: white;
+}
+
+
+/* Signal Light Indicators */
+.signal-light-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.signal-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #bdc3c7; /* Default grey */
+    transition: background-color 0.3s ease;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.signal-circle.red {
+    background-color: #e74c3c;
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+}
+
+.signal-circle.green {
+    background-color: #4CAF50;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+}
+
+.signal-text {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #555;
+}
+
+/* Lane Card Status Colors */
+.lane-card.green-signal {
+    border-color: #4CAF50;
+    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.2);
+}
+
+.lane-card.red-signal {
+    border-color: #e74c3c;
+    box-shadow: 0 4px 20px rgba(231, 76, 60, 0.2);
+}
+
+
+/* Chart Styling (Real-time and Historical) */
+.analytics-section .chart-container, .historical-analytics-section .chart-container {
+    height: 400px; /* Fixed height for the chart */
+    width: 100%;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Alert Status Card */
+.alert-status-card {
+    text-align: center;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 25px;
+    margin-top: 20px; /* Space from current green lane card */
+}
+
+.alert-status-card h3 {
+    color: #d32f2f; /* Red for alerts */
+    margin-top: 0;
+    font-size: 1.4em;
+}
+
+.alert-message {
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.alert-message.no-alert {
+    background-color: #e0e0e0;
+    color: #555;
+}
+
+.alert-message.active-alert {
+    background-color: #ffdddd; /* Light red background */
+    color: #d32f2f; /* Darker red text */
+    animation: pulse-alert 1s infinite alternate; /* Subtle pulsing animation */
+}
+
+@keyframes pulse-alert {
+    from {
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+    }
+    to {
+        box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+    }
+}
+
+.alert-threshold-config {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.alert-threshold-config label {
+    font-weight: bold;
+    color: #444;
+}
+
+.alert-threshold-config input[type="number"] {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 80px;
+    text-align: center;
+    font-size: 1em;
+}
+
+.alert-threshold-config button {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.3s ease;
+}
+
+.alert-threshold-config button:hover {
+    background-color: #0056b3;
+}
+
+.threshold-info {
+    width: 100%; /* Take full width */
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.threshold-info strong {
+    color: #3f51b5;
+}
+
+/* Challan Management Section */
+.challan-management-section {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 25px;
+    margin-top: 25px; /* Space from previous section */
+}
+
+.challan-management-section h2 {
+    color: #3f51b5;
+    font-size: 1.6em;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.challan-controls {
+    display: flex;
+    justify-content: flex-end; /* Align to right */
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.challan-controls label {
+    font-weight: bold;
+    color: #555;
+}
+
+.challan-controls select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.challan-list-container {
+    overflow-x: auto; /* Enable horizontal scrolling for small screens */
+}
+
+#challan-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+#challan-table th, #challan-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+    font-size: 0.9em;
+}
+
+#challan-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #333;
+}
+
+#challan-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#challan-table tbody tr:hover {
+    background-color: #e9e9e9;
+}
+
+.challan-status-pending {
+    color: #d32f2f; /* Red for pending */
+    font-weight: bold;
+}
+
+.challan-status-paid {
+    color: #4CAF50; /* Green for paid */
+    font-weight: bold;
+}
+
+.challan-action-btn {
+    background-color: #28a745; /* Green for mark paid */
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: background-color 0.3s ease;
+    text-decoration: none; /* For the anchor tag button */
+    display: inline-block; /* For the anchor tag button */
+    text-align: center; /* For the anchor tag button */
+}
+
+.challan-action-btn:hover {
+    background-color: #218838;
+}
+
+.generate-receipt-btn {
+    background-color: #007bff; /* Blue for generate receipt */
+}
+
+.generate-receipt-btn:hover {
+    background-color: #0056b3;
+}
+
+.info-message {
+    text-align: center;
+    color: #777;
+    margin-top: 20px;
+    font-style: italic;
+}
