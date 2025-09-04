@@ -76,6 +76,14 @@ An **AI-powered traffic management system** that uses **YOLO + OpenCV** for real
 
 <img width="1553" height="622" alt="Screenshot 2025-09-04 113123" src="https://github.com/user-attachments/assets/036ffd4b-4adb-47f2-ae88-022284d5c7ab" />
 
+# Challan 
+<img width="1671" height="608" alt="Screenshot 2025-09-04 113137" src="https://github.com/user-attachments/assets/e61308c4-9efe-4b83-b8ad-80442bd54089" />
+
+# Generated Challan
+<img width="870" height="1013" alt="Screenshot 2025-09-04 113309" src="https://github.com/user-attachments/assets/4b3cc489-44ab-4c15-ae27-fee07850d916" />
+
+# Payment of Challan
+<img width="786" height="1017" alt="Screenshot 2025-09-04 113227" src="https://github.com/user-attachments/assets/3472ea74-355e-4039-b261-909c67a476f1" />
 
 ---
 
