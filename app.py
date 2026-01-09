@@ -23,6 +23,11 @@ def setup_database():
 # --- Routes ---
 
 @app.route('/')
+def landing():
+    return render_template('landing.html')
+
+
+@app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Handles user login."""
